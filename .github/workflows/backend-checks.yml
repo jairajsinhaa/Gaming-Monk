@@ -20,6 +20,8 @@ jobs:
         working-directory: server
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: gaming-monk-backend-auth
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -41,6 +43,8 @@ jobs:
         working-directory: server
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: gaming-monk-backend-auth
       - uses: actions/setup-node@v4
         with:
           node-version: 20
