@@ -1,0 +1,8 @@
+{
+  "appId": "com.gamingmonk.app",
+  "appName": "Gaming Monk",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
