@@ -1,1 +1,40 @@
-<!doctype html><html lang="hi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090711"><title>Gaming Monk</title><link rel="stylesheet" href="styles.css"></head><body><script>location.replace('https://gaming-monk-1l4y.onrender.com');</script><p style="background:#090711;color:white;padding:24px">Opening Gaming Monk…</p></body></html>
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090711"><meta name="description" content="Gaming Monk esports tournament dashboard">
+  <title>Gaming Monk | Esports</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section class="auth-screen" id="authScreen"><div class="auth-box"><div class="brand-mark auth-mark">G</div><span class="eyebrow">WELCOME TO THE ARENA</span><h1>GAMING <b>MONK</b></h1><p class="auth-copy">Sign in to continue your journey.</p><div class="auth-tabs"><button class="auth-tab active" data-auth-tab="login">Login</button><button class="auth-tab" data-auth-tab="register">Create account</button></div><form id="authForm"><label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label><label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required></label><button class="primary auth-submit" id="authSubmit">Login</button><p id="authMessage" class="auth-message" role="alert"></p></form><small>Secure account • Player access</small></div></section>
+<div class="shell" id="appShell" hidden>
+  <aside class="sidebar">
+    <a class="brand" href="#"><span class="brand-mark">G</span><span>GAMING <b>MONK</b><small>PLAY • COMPETE • WIN</small></span></a>
+    <nav>
+      <button class="nav active" data-page="home">⌂ <span>Dashboard</span></button>
+      <button class="nav" data-page="tournaments">♜ <span>Tournaments</span></button>
+      <button class="nav" data-page="matches">◷ <span>My Matches</span></button>
+      <button class="nav" data-page="wallet">◈ <span>My Wallet</span></button>
+      <button class="nav" data-page="profile">♙ <span>My Profile</span></button>
+    </nav>
+    <div class="side-bottom"><span class="online-dot"></span> Demo environment <small>Version 0.1</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><button class="menu" id="menuBtn">☰</button><div><span class="eyebrow">WELCOME BACK</span><h1 id="pageTitle">Dashboard</h1></div><div class="top-user"><span class="avatar">P</span><span><b id="headerEmail">Player</b><small id="headerRole">PLAYER ACCOUNT</small></span><button id="logoutBtn" class="logout-btn">Logout</button></div></header>
+    <section class="page active" id="home">
+      <div class="hero"><div><span class="eyebrow">YOUR ARENA. YOUR LEGACY.</span><h2>Ready to <em>Dominate?</em></h2><p>Find your next match and climb the leaderboard.</p><button class="primary" data-go="tournaments">Explore tournaments <span>→</span></button></div><div class="hero-art"><div class="ring"></div><div class="hero-g">G</div><span class="hero-tag">GAMING MONK</span></div></div>
+      <div class="stats"><article class="stat"><span>WALLET BALANCE</span><strong id="balanceStat">₹0</strong><small>Demo balance</small></article><article class="stat"><span>TOURNAMENTS JOINED</span><strong>03</strong><small>Your activity</small></article><article class="stat"><span>TOTAL WINS</span><strong>08</strong><small>Keep it going</small></article><article class="stat"><span>TOTAL EARNINGS</span><strong>₹1,250</strong><small>Sample data</small></article></div>
+      <div class="section-head"><div><span class="eyebrow">COMPETE NOW</span><h2>Featured tournaments</h2></div><button class="text-btn" data-go="tournaments">View all →</button></div>
+      <div class="tournament-grid" id="featured"></div>
+      <div class="notice">⚠ <span><b>Demo mode:</b> Tournament entries and wallet amounts are sample data only. No payment or cash withdrawal is enabled.</span></div>
+    </section>
+    <section class="page" id="tournaments"><div class="section-head"><div><span class="eyebrow">FIND YOUR MATCH</span><h2>All tournaments</h2></div><span class="tag">BGMI • DEMO</span></div><div class="filters"><button class="filter active">All</button><button class="filter">Solo</button><button class="filter">Duo</button><button class="filter">Squad</button></div><div class="tournament-grid" id="allTournaments"></div></section>
+    <section class="page" id="matches"><div class="section-head"><div><span class="eyebrow">YOUR COMPETITION</span><h2>My matches</h2></div></div><div class="empty"><div>◷</div><h3>No joined matches yet</h3><p>Join a tournament to see your match details here.</p><button class="primary" data-go="tournaments">Browse tournaments →</button></div></section>
+    <section class="page" id="wallet"><div class="section-head"><div><span class="eyebrow">YOUR FUNDS</span><h2>My wallet</h2></div><span class="tag">DEMO ONLY</span></div><div class="wallet-card"><span>DEMO WALLET BALANCE</span><strong id="walletBalance">₹0</strong><p>This is a visual prototype. No real money is stored.</p><button class="primary" id="addDemo">Add ₹100 demo credit</button></div><h3 class="subhead">Transaction history</h3><div class="empty compact">No transactions yet.</div></section>
+    <section class="page" id="profile"><div class="section-head"><div><span class="eyebrow">PLAYER IDENTITY</span><h2>My profile</h2></div></div><div class="profile-card"><div class="profile-avatar">P</div><div><h2 id="profileName">Player profile</h2><p id="profileBgmiId">BGMI ID: Not added</p><span class="tag">PLAYER</span></div></div><div class="form-card"><label>BGMI in-game name<input id="bgmiName" maxlength="40" placeholder="Enter your BGMI name"></label><label>BGMI Character ID<input id="bgmiId" maxlength="30" placeholder="Enter your Character ID"></label><label>Profile photo<input type="file" accept="image/*"></label><button class="primary" id="saveProfile">Save profile</button><p class="form-msg" id="profileMsg"></p></div></section>
+    <footer>GAMING MONK <span>Built for the next generation of esports.</span></footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>window.GAMING_MONK_API="https://gaming-monk-1l4y.onrender.com";</script><script src="app.js"></script>
+</body></html>
