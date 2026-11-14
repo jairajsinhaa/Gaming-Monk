@@ -1,0 +1,59 @@
+name: Gaming Monk backend checks and database migration
+
+on:
+  push:
+    branches: [gaming-monk-backend-auth]
+    paths:
+      - "server/**"
+      - ".github/workflows/backend-checks.yml"
+  pull_request:
+    paths:
+      - "server/**"
+      - ".github/workflows/backend-checks.yml"
+  workflow_dispatch:
+
+jobs:
+  prisma-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Validate Prisma schema
+        run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/gaming_monk?schema=public
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/gaming_monk?schema=public
+
+  deploy-migrations:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Verify database secret is configured
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL GitHub Actions secret is missing."
+            exit 1
+          fi
+      - name: Apply pending PostgreSQL migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
