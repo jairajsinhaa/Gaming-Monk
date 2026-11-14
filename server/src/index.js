@@ -18,6 +18,15 @@ app.use(cors({ origin: process.env.CLIENT_ORIGIN?.split(",") || false }));
 app.use(express.json({ limit: "20kb" }));
 app.use("/api/auth", rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: "draft-7", legacyHeaders: false }));
 app.get("/api/health", (_req, res) => res.json({ ok: true, service: "gaming-monk-api" }));
+app.get("/api/health/db", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.json({ ok: true, database: "connected" });
+  } catch (error) {
+    console.error("Database health check failed:", error);
+    return res.status(503).json({ ok: false, database: "unavailable" });
+  }
+});
 app.use("/api/auth", authRoutes);
 app.use((err, _req, res, _next) => {
   console.error(err);
