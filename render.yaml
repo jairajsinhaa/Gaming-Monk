@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: gaming-monk
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
