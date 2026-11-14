@@ -12,12 +12,13 @@ document.querySelectorAll("[data-auth-tab]").forEach(tab => tab.addEventListener
   document.getElementById("authPassword").autocomplete = authMode === "login" ? "current-password" : "new-password";
   authMessage.textContent = "";
 }));
-function enterApp(user, token) {
+async function enterApp(user, token) {
   authToken = token;
   authScreen.hidden = true;
   appShell.hidden = false;
   document.getElementById("headerEmail").textContent = user.email;
   document.getElementById("headerRole").textContent = user.role + " ACCOUNT";
+  await loadPlayerProfile();
 }
 document.getElementById("authForm").addEventListener("submit", async event => {
   event.preventDefault();
@@ -30,7 +31,7 @@ document.getElementById("authForm").addEventListener("submit", async event => {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Unable to sign in");
-    enterApp(data.user, data.token);
+    await enterApp(data.user, data.token);
     document.getElementById("authPassword").value = "";
   } catch (error) {
     authMessage.textContent = error.message.includes("Failed to fetch")
@@ -51,5 +52,44 @@ function go(page){document.querySelectorAll(".page").forEach(p=>p.classList.togg
 document.addEventListener("click",e=>{const n=e.target.closest("[data-page]");if(n)go(n.dataset.page);const g=e.target.closest("[data-go]");if(g)go(g.dataset.go);const j=e.target.closest(".join-btn");if(j)toast("Demo only: tournament joining will be enabled after backend setup.");});
 document.getElementById("menuBtn").onclick=()=>document.querySelector(".sidebar").classList.toggle("open");
 document.getElementById("addDemo").onclick=()=>{balance+=100;document.getElementById("walletBalance").textContent="₹"+balance;document.getElementById("balanceStat").textContent="₹"+balance;toast("₹100 demo credit added.");};
-document.getElementById("saveProfile").onclick=()=>{document.getElementById("profileMsg").textContent="Demo profile saved on this screen only.";toast("Profile demo saved.");};
+async function loadPlayerProfile() {
+  if (!authToken) return;
+  try {
+    const response = await fetch(API_BASE + "/api/player/me", { headers: { Authorization: "Bearer " + authToken } });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not load profile");
+    const user = data.user;
+    document.getElementById("bgmiName").value = user.bgmiName || "";
+    document.getElementById("bgmiId").value = user.bgmiId || "";
+    document.getElementById("profileName").textContent = user.bgmiName || user.email;
+    document.getElementById("profileBgmiId").textContent = "BGMI ID: " + (user.bgmiId || "Not added");
+    document.getElementById("profileMsg").textContent = "Profile loaded from Gaming Monk server.";
+  } catch (error) {
+    document.getElementById("profileMsg").textContent = error.message;
+  }
+}
+document.getElementById("saveProfile").onclick = async () => {
+  if (!authToken) return toast("Please log in first.");
+  const button = document.getElementById("saveProfile");
+  button.disabled = true;
+  try {
+    const response = await fetch(API_BASE + "/api/player/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken },
+      body: JSON.stringify({
+        bgmiName: document.getElementById("bgmiName").value.trim() || null,
+        bgmiId: document.getElementById("bgmiId").value.trim() || null
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Profile could not be saved");
+    document.getElementById("profileName").textContent = data.user.bgmiName || data.user.email;
+    document.getElementById("profileBgmiId").textContent = "BGMI ID: " + (data.user.bgmiId || "Not added");
+    document.getElementById("profileMsg").textContent = "Profile saved to database.";
+    toast("Profile saved.");
+  } catch (error) {
+    document.getElementById("profileMsg").textContent = error.message;
+    toast("Profile save failed.");
+  } finally { button.disabled = false; }
+};
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");const mode=b.textContent.toUpperCase();document.getElementById("allTournaments").innerHTML=tournaments.filter(t=>mode==="ALL"||t.mode===mode).map(card).join("");});
