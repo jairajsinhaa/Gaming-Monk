@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/auth.js";
+import tournamentRoutes from "./routes/tournaments.js";
 import { prisma } from "./db.js";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
@@ -28,6 +29,7 @@ app.get("/api/health/db", async (_req, res) => {
   }
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/tournaments", tournamentRoutes);
 app.use((err, _req, res, _next) => {
   console.error(err);
   if (err.code === "P2002") return res.status(409).json({ error: "This account already exists." });
