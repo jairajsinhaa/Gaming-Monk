@@ -1,4 +1,4 @@
-name: Gaming Monk backend checks
+name: Gaming Monk backend checks and database migration
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
     paths:
       - "server/**"
       - ".github/workflows/backend-checks.yml"
+  workflow_dispatch:
 
 jobs:
   prisma-check:
@@ -31,3 +32,20 @@ jobs:
         run: npx prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/gaming_monk?schema=public
+
+  deploy-migrations:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Apply pending PostgreSQL migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
