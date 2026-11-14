@@ -1,0 +1,18 @@
+{
+  "name": "Gaming Monk",
+  "short_name": "Gaming Monk",
+  "description": "BGMI esports tournaments",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090711",
+  "theme_color": "#090711",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
