@@ -7,7 +7,7 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Authentication required" });
   }
   try {
-    req.auth = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    req.auth = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"], issuer: "gaming-monk-api", audience: "gaming-monk" });
     return next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
