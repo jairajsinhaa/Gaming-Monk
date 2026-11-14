@@ -52,4 +52,65 @@ router.patch("/me", async (req, res, next) => {
   } catch (err) { return next(err); }
 });
 
+/**
+ * List matches belonging to tournaments the player has joined.
+ * Room credentials are returned only to authenticated participants.
+ */
+router.get("/matches", async (req, res, next) => {
+  try {
+    const entries = await prisma.tournamentEntry.findMany({
+      where: {
+        status: { in: ["JOINED", "CONFIRMED", "ELIMINATED"] },
+        OR: [
+          { captainId: req.auth.sub },
+          { members: { some: { userId: req.auth.sub } } }
+        ]
+      },
+      orderBy: { joinedAt: "desc" },
+      select: {
+        id: true,
+        teamName: true,
+        status: true,
+        tournament: {
+          select: {
+            id: true,
+            title: true,
+            mode: true,
+            status: true,
+            map: true,
+            matches: {
+              orderBy: [{ round: "asc" }, { matchNumber: "asc" }],
+              select: {
+                id: true,
+                round: true,
+                matchNumber: true,
+                status: true,
+                roomId: true,
+                roomPassword: true,
+                startsAt: true
+              }
+            }
+          }
+        }
+      }
+    });
+    const matches = entries.flatMap(entry =>
+      entry.tournament.matches.map(match => ({
+        ...match,
+        entryId: entry.id,
+        teamName: entry.teamName,
+        entryStatus: entry.status,
+        tournament: {
+          id: entry.tournament.id,
+          title: entry.tournament.title,
+          mode: entry.tournament.mode,
+          status: entry.tournament.status,
+          map: entry.tournament.map
+        }
+      }))
+    );
+    return res.json({ matches });
+  } catch (err) { return next(err); }
+});
+
 export default router;
