@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090711"><meta name="description" content="Gaming Monk esports tournament dashboard">
-  <title>Gaming Monk | Esports</title><link rel="stylesheet" href="styles.css">
+  <title>Gaming Monk | Esports</title><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <section class="auth-screen" id="authScreen"><div class="auth-box"><div class="brand-mark auth-mark">G</div><span class="eyebrow">WELCOME TO THE ARENA</span><h1>GAMING <b>MONK</b></h1><p class="auth-copy">Sign in to continue your journey.</p><div class="auth-tabs"><button class="auth-tab active" data-auth-tab="login">Login</button><button class="auth-tab" data-auth-tab="register">Create account</button></div><form id="authForm"><label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label><label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required></label><button class="primary auth-submit" id="authSubmit">Login</button><p id="authMessage" class="auth-message" role="alert"></p></form><small>Secure account • Player access</small></div></section>
@@ -36,5 +36,5 @@
   </main>
 </div>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js"></script>
+<script src="app.js"></script><script>if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));</script>
 </body></html>
