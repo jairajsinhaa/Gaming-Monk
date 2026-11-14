@@ -6,12 +6,20 @@ services:
     region: singapore
     rootDir: server
     buildCommand: npm install && npx prisma generate
-    startCommand: npm start
+    startCommand: npm run db:deploy && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "24"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: gaming-monk-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
+databases:
+  - name: gaming-monk-db
+    plan: free
+    region: singapore
+    databaseName: gaming_monk_db
+    user: gaming_monk_db_user
