@@ -57,6 +57,10 @@ jobs:
             echo "DATABASE_URL GitHub Actions secret is missing."
             exit 1
           fi
+      - name: Mark failed duplicate migration as rolled back
+        run: npx prisma migrate resolve --rolled-back 20261114100000_tournament_wallet_models
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Apply pending PostgreSQL migrations
         run: npx prisma migrate deploy
         env:
