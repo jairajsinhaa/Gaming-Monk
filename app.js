@@ -1,5 +1,5 @@
 // Set this to the deployed API origin before publishing.
-const API_BASE = window.GAMING_MONK_API || "http://localhost:4000";
+const API_BASE = window.GAMING_MONK_API || (window.location.protocol === "file:" ? "http://localhost:4000" : window.location.origin);
 let authMode = "login";
 let authToken = null;
 const authScreen = document.getElementById("authScreen");
