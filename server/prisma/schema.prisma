@@ -13,15 +13,211 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum TournamentMode {
+  SOLO
+  DUO
+  SQUAD
+}
+
+enum TournamentStatus {
+  DRAFT
+  UPCOMING
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum EntryStatus {
+  JOINED
+  CONFIRMED
+  ELIMINATED
+  DISQUALIFIED
+  CANCELLED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+  PRIZE
+  REFUND
+  ADJUSTMENT
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REVERSED
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  role         UserRole @default(PLAYER)
-  bgmiName     String?  @map("bgmi_name")
-  bgmiId       String?  @map("bgmi_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  passwordHash        String              @map("password_hash")
+  role                UserRole            @default(PLAYER)
+  bgmiName            String?             @map("bgmi_name")
+  bgmiId              String?             @map("bgmi_id")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  wallet              WalletAccount?
+  stats               PlayerStats?
+  createdTournaments  Tournament[]        @relation("TournamentCreator")
+  captainedEntries    TournamentEntry[]   @relation("EntryCaptain")
+  entryMemberships    TournamentEntryMember[]
+  auditEvents         AuditLog[]          @relation("AuditActor")
 
   @@map("users")
+}
+
+model Tournament {
+  id             String           @id @default(cuid())
+  title          String
+  description    String?
+  mode           TournamentMode
+  status         TournamentStatus @default(DRAFT)
+  map            String            @default("Erangel")
+  entryFeePaise  Int               @default(0) @map("entry_fee_paise")
+  prizePoolPaise Int               @default(0) @map("prize_pool_paise")
+  maxTeams       Int               @map("max_teams")
+  startsAt       DateTime?         @map("starts_at")
+  createdById    String            @map("created_by_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+  createdBy      User              @relation("TournamentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  entries        TournamentEntry[]
+  matches        GameMatch[]
+
+  @@index([status, startsAt])
+  @@index([createdById])
+  @@map("tournaments")
+}
+
+model TournamentEntry {
+  id           String                  @id @default(cuid())
+  tournamentId String                  @map("tournament_id")
+  captainId    String                  @map("captain_id")
+  teamName     String?                 @map("team_name")
+  status       EntryStatus             @default(JOINED)
+  joinedAt     DateTime                @default(now()) @map("joined_at")
+  tournament   Tournament              @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  captain      User                    @relation("EntryCaptain", fields: [captainId], references: [id], onDelete: Restrict)
+  members      TournamentEntryMember[]
+  result       TournamentResult?
+
+  @@unique([tournamentId, captainId])
+  @@index([tournamentId, status])
+  @@index([captainId])
+  @@map("tournament_entries")
+}
+
+model TournamentEntryMember {
+  id        String          @id @default(cuid())
+  entryId   String          @map("entry_id")
+  userId    String          @map("user_id")
+  joinedAt  DateTime        @default(now()) @map("joined_at")
+  entry     TournamentEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([entryId, userId])
+  @@index([userId])
+  @@map("tournament_entry_members")
+}
+
+model GameMatch {
+  id           String           @id @default(cuid())
+  tournamentId String           @map("tournament_id")
+  round        Int              @default(1)
+  matchNumber  Int              @default(1) @map("match_number")
+  status       MatchStatus      @default(SCHEDULED)
+  roomId       String?           @map("room_id")
+  roomPassword String?           @map("room_password")
+  startsAt     DateTime?         @map("starts_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  tournament   Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  results      TournamentResult[]
+
+  @@unique([tournamentId, round, matchNumber])
+  @@index([tournamentId, status])
+  @@map("game_matches")
+}
+
+model TournamentResult {
+  id           String          @id @default(cuid())
+  entryId      String          @unique @map("entry_id")
+  matchId      String?         @map("match_id")
+  rank         Int
+  kills        Int             @default(0)
+  points       Int             @default(0)
+  prizePaise   Int             @default(0) @map("prize_paise")
+  declaredAt   DateTime        @default(now()) @map("declared_at")
+  entry        TournamentEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  match        GameMatch?      @relation(fields: [matchId], references: [id], onDelete: SetNull)
+
+  @@index([matchId])
+  @@map("tournament_results")
+}
+
+model WalletAccount {
+  id                  String             @id @default(cuid())
+  userId              String             @unique @map("user_id")
+  balancePaise        Int                @default(0) @map("balance_paise")
+  winningBalancePaise Int                @default(0) @map("winning_balance_paise")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions        WalletTransaction[]
+
+  @@map("wallet_accounts")
+}
+
+model WalletTransaction {
+  id             String                  @id @default(cuid())
+  accountId      String                  @map("account_id")
+  type           WalletTransactionType
+  status         WalletTransactionStatus @default(PENDING)
+  amountPaise    Int                     @map("amount_paise")
+  description    String?
+  reference      String?
+  idempotencyKey String?                 @unique @map("idempotency_key")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  account        WalletAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt])
+  @@index([status, createdAt])
+  @@map("wallet_transactions")
+}
+
+model PlayerStats {
+  id                 String   @id @default(cuid())
+  userId             String   @unique @map("user_id")
+  playedMatches      Int      @default(0) @map("played_matches")
+  totalWins          Int      @default(0) @map("total_wins")
+  totalEarningsPaise Int      @default(0) @map("total_earnings_paise")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("player_stats")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
 }
