@@ -32,7 +32,7 @@ jobs:
         run: npx prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/gaming_monk?schema=public
-
+ 
   deploy-migrations:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
